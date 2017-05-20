@@ -1,0 +1,673 @@
+<html lang='en'>
+<head>
+  <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Polly Labs Playground - Console</title>
+      <script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'>
+    MathJax.Hub.Config({
+    jax: ["input/TeX","output/HTML-CSS"],
+    displayAlign: "left"
+    });
+    //MathJax.Hub.Startup.onload();
+    </script>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=PT+Serif:400,700,400italic' rel='stylesheet' type='text/css'>
+  <link href='https://netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.css' rel='stylesheet' type='text/css'>
+  <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+  <link href='css/ansi.css' rel='stylesheet' type='text/css'>
+  <link href='css/pypyjs.css' rel='stylesheet' type='text/css'>
+  <script src="js/main.js" type="text/javascript" charset="utf-8"></script>
+  <script src="d3.v4.min.js"></script>
+  <script src="d3plot.js"></script>
+
+  <style>
+    .pt-input {
+      width: 100%;
+      font-family: "DejaVu Sans Mono", "Courier", "Courier New", monospace;
+      border-radius: 5px;
+      border: 2px solid lightgrey;
+      padding: 3px;
+      padding-left: 5px;
+      margin-top: 5px;
+      margin-bottom: 5px;
+      font-size: 1.2em;
+      color: #555555;
+    }
+
+    .pt-input:focus {
+      border-color: #72b5ff;
+      color: black;
+    }
+
+    .pt-output {
+      font-family: "DejaVu Sans Mono", "Courier", "Courier New", monospace;
+      font-size: 1.2em;
+    }
+
+    svg {
+      font: 10px sans-serif;
+      padding: 10px;
+    }
+    .frame {
+      shape-rendering: crispEdges;
+      fill: none;
+      stroke: #ddd;
+    }
+    circle {
+      fill-opacity: 0.8;
+    }
+    .tickline {
+      stroke: #eee;
+      fill: none;
+      shape-rendering: crispEdges;
+    }
+    .tile {
+      fill-opacity: 0.3;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+          <a class="navbar-brand" id="logo" href="http://www.pollylabs.org">
+<img src="images/logo.png" width="80" style="margin-right:10px">
+  </a>
+        <a href="./" style="margin-left: 0px; font-size: 1.5em" class="navbar-brand"><b>Playground</b></a>
+
+       <ul class="nav navbar-nav" style="margin-left: 100px; margin-top: 6px">
+<li>
+    <button class="btn btn-primary" onclick="pt_clearAutosavedSession()" style="margin-right: 5px">
+<span class="glyphicon glyphicon-file"></span>
+New</button>
+</li><li>
+	<button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" style="margin-right: 5px">
+<span class="glyphicon glyphicon-open"></span>
+Examples <span class="caret"></span></button>
+<ul class="dropdown-menu" role="menu">
+	<li><a onclick="pt_loadExample('Introduction')">Introduction</a></li>
+	<li><a onclick="pt_loadExample('ast-generation.json')">AST Generation</a></li>
+</ul>
+</li><li>
+	<button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" style="margin-right: 5px">
+<span class="glyphicon glyphicon-open"></span>
+Load a Session <span class="caret"></span></button>
+<ul class="dropdown-menu" role="menu">
+	<li><a onclick="pt_loadAutosavedSession()"><span class="glyphicon glyphicon-open"></span> Autosaved Session</a></li>
+	<li><a onclick="pt_loadSessionFromFile()"><span class="glyphicon glyphicon-open"></span> Open from File</a></li>
+	<li><a onclick="pt_loadSessionFromURL()"><span class="glyphicon glyphicon-open"></span> Open from URL</a></li>
+</li>
+</ul>
+</li><li>
+	<button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" style="margin-right: 5px">
+<span class="glyphicon glyphicon-save"></span>
+Save a Session <span class="caret"></span></button>
+<ul class="dropdown-menu" role="menu">
+	<li><a onclick="pt_saveSessionToFile()"><span class="glyphicon glyphicon-save"></span> Save to File</a></li>
+	<li><a onclick="pt_getSessionURL()"><span class="glyphicon glyphicon-save"></span> Save to Shareable URL</a></li>
+</li>
+</ul>
+</li><li>
+    <button class="btn btn-primary" onclick="pt_executeAll()" style="float:right;font-weight:bold;margin-left:10px">
+<span class="glyphicon glyphicon-repeat"></span>
+Run All</button>
+      </span>
+</li>
+       </ul>
+      </div>
+    </div>
+  </div>
+  <div class='container'>
+    <noscript><h3>Please enable JavaScript for using PyPy.js</h3></noscript>
+    <input type="file" id="fileSelector" style="display:none;" onchange="pt_uploadFile();this.value = null;">
+    <div id="pt-ui">
+      <div id="pt-wait">Please wait until PyPy.js is loaded.  It is huge, so it may take a while...</div>
+    </div>
+  </div>
+  <div class='container' style="height: 320px">
+  </div>
+  <div class='container'>
+     This work is powered by <a
+href="http://emscripten.org">Emscripten</a> and <a
+href="http://pypyjs.org">PyPy.js</a>.
+  </div>
+  <div class='container'>
+  <h2> Tutorial </h2>
+  Our <a href="https://lirias.kuleuven.be/bitstream/123456789/523109/3/polycomp-tutorial-v0.02.pdf">
+Presburger Formulas and Polyhedral Compilation Tutorial</a> provides
+documentation on how to use isl and isl python. However, it currently lacks
+documentation of the AST generation functionality.
+  <h2> Publications </h2>
+  <p>
+  <b>isl: An Integer Set Library for the Polyhedral Model</b><br>
+  Sven Verdoolaege<br>
+  Lecture notes in computer science - mathematical software (ICMS), 2010<br>
+  <a href="http://link.springer.com/chapter/10.1007%2F978-3-642-15582-6_49">Details</a>
+  </p>
+  <p>
+  <b>Polyhedral AST generation is more than scanning polyhedra</b><br>
+     Tobias Grosser, Sven Verdoolaege, Albert Cohen<br>
+     ACM transactions on programming languages and systems (TOPLAS), 2015<br>
+     <a href="http://www.grosser.es/#pub-polyhedral-AST-generation">Details</a>
+  </p>
+  </div>
+  <script src="pypyjs-release/lib/Promise.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="pypyjs-release/lib/FunctionPromise.js" type="text/javascript" charset="utf-8"></script>
+  <script src="pypyjs-release/lib/pypy.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/jquery-migrate-1.2.1.min.js" type="text/javascript" charset="utf-8"></script>
+  
+  <script>
+    var exp_format="python";
+    var pt_lastCellNumber = 0;
+    var pt_ip="input";
+    var pt_op="output";
+    var sess={};
+    var pt_graphics_number=1;
+    var pt_graphics_id="";
+
+    //initialize vm for the first time
+    $(function() { pt_initVM(true); });
+
+    function escapeHTML(text) {
+      return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    }
+    function replaceNewlines(text) {
+      return text.replace(/\n/g,"<br>")
+    }
+    function pt_toggleVisibility(element) {
+      if (element.style.display == "none") {
+        element.style.display = "block";
+        return true;
+      } else {
+        element.style.display = "none";
+        return false;
+      }
+    }
+    function pt_toggleStackTraceVisibility(element) {
+      let visible = pt_toggleVisibility(element.nextSibling);
+      if (visible)
+        element.innerHTML = "Hide stack trace";
+      else
+        element.innerHTML = "Show stack trace";
+    }
+    function pt_errorHTML(errorObject) {
+      let html = "<div class='alert alert-danger' role='alert><span style='color: red'>";
+      html += '<strong>' + errorObject.name + "</strong>: " + errorObject.message;
+      html += "</span><br><span style='color: black; text-decoration: underline; cursor: pointer' onclick='pt_toggleStackTraceVisibility(this)'>Show stack trace</span>"
+      console.log(errorObject);
+      html += "<div style='display: none; color: black'>" + replaceNewlines(escapeHTML(errorObject.trace.toString())) + "</div>"
+      html += "</div>"
+      return html;
+    }
+
+    function pt_resizeTextArea(element) {
+      let numLines = (element.value.match(/\n/g) || []).length;
+      element.rows = numLines + 1;
+    }
+
+    /* Get the string with indentation prefix for the next line based on the
+     * current line.
+     * Use tabs or spaces depending on what is present in leading spaces of the
+     * previous line. Increase indentation if line ends with a colon, assuming
+     * block. Current implementation does not handle string literals or
+     * comments.
+     */
+    function pt_computeIndentation(code) {
+      let lastLineStart = code.lastIndexOf("\n") + 1;  // also handles not found=-1 case
+      let line = code.substr(lastLineStart);
+      let leadingSpaces = line.match(/^[ ]*/)[0].length;
+      let leadingTabs = line.match(/^\t*/)[0].length;
+
+      if (leadingSpaces != 0 && leadingTabs != 0)
+        return "";       // Python will fail on mix of tabs and spaces anyway.
+
+      line = line.trim();
+      let requiresExtraIndent = line.endsWith(":");
+      if (leadingTabs != 0) {
+        if (requiresExtraIndent)
+          leadingTabs += 1;
+        return "\t".repeat(leadingTabs);
+      } else {                      // Prefer spaces.
+        if (requiresExtraIndent)
+          leadingSpaces += 4;
+        return " ".repeat(leadingSpaces);
+      }
+    }
+
+    function pt_backspaceSize(code) {
+      let lastLineStart = code.lastIndexOf("\n") + 1;
+      let line = code.substr(lastLineStart);
+      let spaces = (line.match(/^[ ]*$/) || [""])[0].length;
+      let tabs = (line.match(/^\t*$/) || [""])[0].length;
+
+      if (tabs != 0)
+        return 1;
+      if (spaces < 4)
+        return 1;
+      return 4;
+    }
+
+    function pt_getNextCell(element) {
+      let id = element.getAttribute("id");
+      id = id.replace(pt_ip, "");
+      let cellNumber = parseInt(id);
+      return document.getElementById(pt_ip + (cellNumber + 1).toString());
+    }
+
+    function pt_getPreviousCell(element) {
+      let id = element.getAttribute("id");
+      id = id.replace(pt_ip, "");
+      let cellNumber = parseInt(id);
+      return document.getElementById(pt_ip + (cellNumber - 1).toString());
+    }
+
+    function pt_appendCell() {
+      let ui = document.getElementById("pt-ui");
+      let newInputElement = document.createElement("textarea");
+      newInputElement.style.overflow="hidden";
+      newInputElement.style.resize="none";
+      newInputElement.placeholder="Type in code and press Shift+Enter to execute";
+      newInputElement.rows=1;
+      pt_lastCellNumber = pt_lastCellNumber + 1;
+      newInputElement.setAttribute("id", pt_ip + pt_lastCellNumber.toString());
+      newInputElement.setAttribute("class", "pt-input");
+
+      let newOutputElement = document.createElement("div");
+      newOutputElement.setAttribute("id", pt_op + pt_lastCellNumber.toString());
+      newOutputElement.setAttribute("class", "pt-output");
+
+      newInputElement.addEventListener("keyup", function(event) {
+          if (event.keyCode == 13 && event.shiftKey) {
+            pt_processInput(newInputElement, newOutputElement);
+            event.preventDefault();
+            event.stopPropagation();
+          }
+        });
+      newInputElement.addEventListener("keydown", function(event) {
+          if (event.keyCode == 13) {
+            if (event.shiftKey) {
+              event.preventDefault();
+              event.stopPropagation();
+            } else if (!event.shiftKey && newInputElement.selectionStart == newInputElement.selectionEnd) {
+              event.preventDefault();
+              event.stopPropagation();
+              let input = newInputElement.value.substr(0, newInputElement.selectionStart);
+              let remainder = newInputElement.value.substr(newInputElement.selectionStart);
+              let oldPosition = newInputElement.selectionStart;
+              let indent = "\n" + pt_computeIndentation(input.substr(0, input.length));
+              newInputElement.value = input + indent + remainder;
+              newInputElement.selectionStart = oldPosition + indent.length;
+              newInputElement.selectionEnd = oldPosition + indent.length;
+              pt_resizeTextArea(newInputElement);
+            }
+          } else if (event.keyCode == 8) {
+            if (newInputElement.selectionStart == newInputElement.selectionEnd) {
+              event.preventDefault();
+              event.stopPropagation();
+              let input = newInputElement.value.substr(0, newInputElement.selectionStart);
+              let deleteChars = pt_backspaceSize(input);
+              let remainder = newInputElement.value.substr(newInputElement.selectionStart);
+              let oldPosition = newInputElement.selectionStart;
+              newInputElement.value = input.substr(0, input.length - deleteChars) + remainder;
+              newInputElement.selectionStart = oldPosition - deleteChars;
+              newInputElement.selectionEnd = oldPosition - deleteChars;
+              pt_resizeTextArea(newInputElement);
+            }
+          } else if (event.keyCode == 38) { // Arrow Up.
+            if (newInputElement.selectionStart == newInputElement.selectionEnd) {
+              let input = newInputElement.value;
+              let firstLineEnd = input.indexOf("\n");
+              if (newInputElement.selectionStart <= firstLineEnd || firstLineEnd == -1) {
+                let previousInputElement = pt_getPreviousCell(newInputElement);
+                if (previousInputElement) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  let previousInput = previousInputElement.value;
+                  let previousLastLineStart = previousInput.lastIndexOf("\n") + 1;
+                  let charOffset = newInputElement.selectionStart
+                  let positionInPrevious = (previousLastLineStart == -1) ? charOffset
+                                        : previousLastLineStart + charOffset;
+                  if (positionInPrevious > previousInput.length)
+                    positionInPrevious = previousInput.length;
+
+                  previousInputElement.focus();
+                  previousInputElement.selectionStart = previousInputElement.selectionEnd = positionInPrevious;
+                }
+              }
+            }
+          } else if (event.keyCode == 40) { // Arrow Down.
+            if (newInputElement.selectionStart == newInputElement.selectionEnd) {
+              let input = newInputElement.value;
+              let lastLineStart = input.lastIndexOf("\n") + 1;
+              if (newInputElement.selectionStart >= lastLineStart) {
+                let nextInputElement = pt_getNextCell(newInputElement);
+                if (nextInputElement) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  let nextInput = nextInputElement.value;
+                  let charOffset = newInputElement.selectionStart - lastLineStart;
+                  let positionInNext = charOffset;
+                  let nextFirstLineEnd = nextInput.indexOf("\n");
+                  if (nextFirstLineEnd == -1 && positionInNext > nextInput.length)
+                    positionInNext = nextInput.length;
+                  else if (nextFirstLineEnd != -1 && positionInNext > nextFirstLineEnd)
+                    positionInNext = nextFirstLineEnd;
+
+                  nextInputElement.focus();
+                  nextInputElement.selectionStart = nextInputElement.selectionEnd = positionInNext;
+                }
+              }
+            }
+          }
+        });
+      newInputElement.addEventListener("input", function() {
+          pt_resizeTextArea(newInputElement);
+        });
+
+      ui.appendChild(newInputElement);
+      ui.appendChild(newOutputElement);
+
+      newInputElement.focus();
+    }
+
+    let pt_partialOutput = "";
+
+    function pt_appendPartialStdout(line) {
+      pt_partialOutput += line;
+    }
+
+    function pt_appendPartialStderr(line) {
+      pt_partialOutput += "<div class=\"alert alert-danger\" role=\"alert\">" + line + "</div>";
+    }
+
+    function pt_finalizeStdoutStderr(outputElement, overwrite) {
+      pt_appendOutput(pt_partialOutput, outputElement, overwrite);
+      pt_partialOutput = "";
+    }
+
+    function pt_createfunctionCall(code) {
+      var gfunctioncall = "";
+      if (code.includes("uset")) {
+      code = code.replace("uset",pt_graphics_id);
+      gfunctioncall = gfunctioncall+"\nplotUnionSetCombined\(\"#"+pt_graphics_id+"\","+pt_graphics_id+", \""+pt_graphics_id+"\"\)\;";
+      } else {
+        code = code.replace("umap",pt_graphics_id);
+        gfunctioncall = gfunctioncall+"\nplotUnionMapClosed\(\"#"+pt_graphics_id+"\","+pt_graphics_id+", \""+pt_graphics_id+"\"\)\;";  
+      }
+      code = code+gfunctioncall;
+      var newcode = code;
+      return newcode;
+    }
+
+    function pt_appendOutput(code, outputElement, overwrite) {
+      let ui = document.getElementById("pt-ui");
+      if(overwrite)
+        outputElement.innerHTML = "";
+      if (exp_format == "error") {
+        outputElement.innerHTML += code;
+      } else if (exp_format == "graphics") {
+        let gdiv = document.createElement('div');
+        pt_graphics_id = "";
+        pt_graphics_id = "graphics"+pt_graphics_number.toString();
+        gdiv.setAttribute("id",pt_graphics_id);
+        outputElement.appendChild(gdiv);
+        let gscript = document.createElement('script');
+        gscript.setAttribute('type','text/javascript');
+        code=pt_createfunctionCall(code);
+        gscript.innerHTML = code;
+        outputElement.appendChild(gscript);
+        pt_graphics_number = pt_graphics_number + 1;
+      } else {
+        outputElement.innerHTML += replaceNewlines(code);
+      }
+      MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+
+      let id = outputElement.getAttribute("id");
+      id = id.replace(pt_op, "");
+      if (overwrite && sess[id] != undefined)
+        sess[id][1] = code;
+      else if (sess[id] == undefined)
+        sess[id] = ['', code, exp_format];
+      else
+        sess[id][1] += code;
+      localStorage.setItem('session',JSON.stringify(sess));
+    }
+    function pt_outputError(errorObject, outputElement, overwrite) {
+      exp_format = "error";
+      pt_appendOutput(pt_errorHTML(errorObject), outputElement, overwrite);
+      exp_format = "";
+    }
+    function pt_processInput(element, outputElement) {
+      let code = element.value;
+      if (code.startsWith("graphics")) {
+        exp_format = "graphics";
+        code = code.replace("graphics\(","");
+        code = code.trim();
+        code = code.substring(0, code.length - 1);
+      } else {
+        exp_format = "python";
+      }
+
+      let overwrite = false;
+      let id = element.getAttribute("id");
+      id = id.replace(pt_ip, "");
+      if (sess[id] == undefined) {
+        sess[id] = [element.value, '', ''];
+      } else {
+        sess[id][0] = element.value;
+        overwrite = true;
+      }
+      localStorage.setItem('session',JSON.stringify(sess));
+
+      // Move focus to the next cell if available already.
+      // pt_appendCell will move it otherwise.
+      let nextCell = pt_getNextCell(element);
+      if (nextCell)
+        nextCell.focus();
+
+      let promise = vm.exec(code)
+        .then(() => pt_finalizeStdoutStderr(outputElement, overwrite),
+              errorObject => pt_outputError(errorObject, outputElement, overwrite));
+      if (!overwrite)
+        promise = promise.then(pt_appendCell);
+      return promise;
+    }
+
+    //initialize the vm
+    function pt_initVM(firstInitialization) {
+        window.vm = new PyPyJS();
+        vm.loadModuleData("json");
+        vm.loadModuleData("random");
+        vm.loadModuleData("string");
+        vm.stdout = pt_appendPartialStdout;
+        vm.stderr = pt_appendPartialStderr;
+        var pseudoStatus = setInterval(function() {
+            let waitElement = document.getElementById("pt-wait");
+            waitElement.innerHTML += ".";
+        }, 500);
+        vm.ready.then(function() {
+          clearInterval(pseudoStatus);
+          let ui = document.getElementById("pt-ui");
+          let waitElement = document.getElementById("pt-wait");
+          ui.removeChild(waitElement);
+    $.ajax({
+            url: 'isl.txt',
+      type: 'get',
+      async: false,
+      success: function(html) {
+          islpy = String(html);
+          }
+    });
+
+     loadislcode =
+       "import js,sys,imp;                            \
+        islpystr = str(js.globals.islpy);             \
+        sys.modules['isl'] = imp.new_module('isl');   \
+        exec islpystr in sys.modules['isl'].__dict__; \
+        import isl;"
+
+    $.ajax({
+            url: 'islplot_support.txt',
+      type: 'get',
+      async: false,
+      success: function(html) {
+          islplotsupport = String(html);
+          }
+    });
+
+     loadislplotsupportcode =
+       "import js,sys,imp;                                                    \
+        islplotsupportstr = str(js.globals.islplotsupport);                   \
+        sys.modules['islplot'] = imp.new_module('islplot');                   \
+        sys.modules['islplot.support'] = imp.new_module('islplot.support');   \
+        sys.modules['islplot'].support = sys.modules['islplot.support'];      \
+        exec islplotsupportstr in sys.modules['islplot.support'].__dict__;    \
+        import islplot.support;                                               \
+        from islplot.support import plot"
+
+    loadcode = loadislcode + loadislplotsupportcode;
+
+    if (firstInitialization) {
+      //first execution - need to check url
+      firstInitialization = false;
+      vm.exec(loadcode).then(vm.execfile("../../latex_op.py")).then(pt_appendCell, pt_appendCell).then(pt_checkURL);
+    } else {
+      //not the first execution - need to check for unexecuted inputs
+      vm.exec(loadcode).then(vm.execfile("../../latex_op.py")).then(pt_appendCell, pt_appendCell).then(pt_executeRemainingInputs);
+    }
+      });
+    }
+
+    //clear the saved session
+    function pt_clearAutosavedSession() {
+      sess = {};
+      pt_executeAll();
+    }
+    //load from local storage
+    function pt_loadAutosavedSession() {
+      sess = localStorage.getItem('session');
+      if(sess == null) {
+        sess = '{}';
+        localStorage.setItem('session',sess);
+      }
+      sess = JSON.parse(sess);
+      pt_executeAll();
+    }
+    //save current session to a file
+    function pt_saveSessionToFile() {
+      function destroyLink(event) {
+        document.body.removeChild(event.target);
+      }
+      let text = JSON.stringify(sess);
+      let textBlob = new Blob([text], {type:'text/plain'});
+      let textURL = window.URL.createObjectURL(textBlob);
+      let link = document.createElement('a');
+      link.download = prompt("Enter the new file name:", "session.json");
+      link.href = textURL;
+      link.onclick = destroyLink;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+    }
+    //load a session from a file
+    function pt_loadSessionFromFile() {
+      let fileSelector = document.getElementById('fileSelector');
+      fileSelector.click();
+    }
+    //run when the file to be loaded is selected
+    function pt_uploadFile() {
+      let fileSelector = document.getElementById('fileSelector');
+      let fileName = fileSelector.files[0];
+      if (fileName == null)
+        return;
+      let reader = new FileReader();
+      reader.onload = function(event) {
+        let text = event.target.result;
+        localStorage.setItem('session',text);
+        sess = JSON.parse(text);
+        pt_executeAll();
+      };
+      reader.readAsText(fileName);
+    }
+    //execute all inputs in order
+    function pt_executeAll() {
+      let ui = document.getElementById("pt-ui");
+      let allInputElements = document.getElementsByClassName("pt-input");
+      if (!allInputElements || allInputElements.length == 0) {
+        alert('Please wait until the page loads completely');
+        return;
+      }
+      //delete all current input and output fields
+      ui.innerHTML = "<div id='pt-wait'>Please wait until PyPy.js is loaded.  It is huge, so it may take a while...</div>";
+      pt_lastCellNumber = 0;
+      //reset vm
+      pt_initVM(false);
+    }
+    //check if more inputs are already in session - if so, keep executing them
+    function pt_executeRemainingInputs() {
+      let pair = sess[pt_lastCellNumber.toString()];
+      if (pair != undefined) {
+        let inputElement = document.getElementById(pt_ip + pt_lastCellNumber.toString());
+        let outputElement = document.getElementById(pt_op + pt_lastCellNumber.toString());
+        inputElement.value = pair[0];
+        pt_resizeTextArea(inputElement);
+        pt_processInput(inputElement, outputElement)
+          .then(pt_appendCell)
+          .then(pt_executeRemainingInputs);
+      }
+    }
+    //convert session to URL that will work with same website
+    function pt_getSessionURL() {
+      //create a copy of current session, but only the inputs
+      let sessionCopy = {};
+      for(let iter = 1; sess[iter.toString()] != undefined; iter++) {
+        sessionCopy[iter.toString()] = [sess[iter.toString()][0],'',''];
+      }
+      let sessurl = location.origin+location.pathname+'?sess='+encodeURIComponent(JSON.stringify(sessionCopy));
+      prompt('Copy this URL and press Enter',sessurl);
+    }
+    //check URL query section for additional info
+    function pt_checkURL() {
+      //get the list of query pairs
+      let queryList = location.search.substring(1).split('&');
+      //default values of data
+      let querySess = '';
+      //check for specific queries
+      for(let iter = 0; iter < queryList.length; iter++) {
+        let queryPair = queryList[iter].split('=');
+        switch (queryPair[0]) {
+          case 'sess':
+            querySess = decodeURIComponent(queryPair[1]);
+            break;
+          default:
+            //not recognized, do nothing
+        }
+      }
+      //use the obtained data
+      if (querySess != '') {
+        sess = JSON.parse(querySess);
+        pt_executeAll();
+      }
+    }
+    function pt_loadSessionFromURL() {
+      let sessurl = prompt('Enter URL of session file');
+      $.get(sessurl,function(data) {sess = data;},'json').then(pt_executeAll);
+    }
+    function pt_loadExample(name) {
+      const exampleDir='examples/';
+      $.get(exampleDir+name,function(data) {sess = data;},'json').then(pt_executeAll);
+    }
+  </script>
+  <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js'></script>
+</body>
+</html>

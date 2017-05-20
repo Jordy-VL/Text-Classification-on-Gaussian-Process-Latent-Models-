@@ -1,0 +1,53 @@
+For N = 1000 to Q = 200
+Linear  Kernel GPLVM
+Accuracy for the GPLVM models:
+0.96
+0.895
+0.94
+
+#################################
+Results for a normal Classifier:
+0.95
+0.89
+0.93
+
+For N = 1000 to Q = 100
+RBF Kernel 
+Accuracy for the GPLVM models:
+0.95
+0.89
+0.93
+#################################
+Results for a normal Classifier:
+0.925
+0.87
+0.895
+
+For N = 5000 to Q = 500
+Linear
+Accuracy for the GPLVM models:
+0.965
+0.92
+0.935
+#################################
+Results for a normal Classifier:
+0.965
+0.91
+0.955
+
+For N = 5000 to Q = 500
+Accuracy for the GPLVM models:
+RBF
+0.95
+0.915
+0.92
+#################################
+Results for a normal Classifier:
+0.965
+0.93
+0.955
+
+
+IP: 192.168.7.73
+user name: intern_manish
+Password: iith1234
